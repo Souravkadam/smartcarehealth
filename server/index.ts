@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { config } from "dotenv";
 
-// Load .env before anything else
+// Load .env before anything else (local dev only — Render uses dashboard env vars)
 config();
 
 import { connectDB } from "../database/connect.js";
@@ -23,30 +23,32 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  app.use(express.json());
+  app.use(express.json({ limit: "10mb" }));
 
-  // Allow requests from Vite dev server
+  // CORS — allow all origins in production (Render serves both frontend + API)
   app.use((_req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    const origin = _req.headers.origin || "*";
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
     if (_req.method === "OPTIONS") return res.sendStatus(204);
     next();
   });
 
   // API routes
-  app.use("/api/hospitals", hospitalsRouter);
-  app.use("/api/users", usersRouter);
-  app.use("/api/auth", authRouter);
+  app.use("/api/hospitals",    hospitalsRouter);
+  app.use("/api/users",        usersRouter);
+  app.use("/api/auth",         authRouter);
   app.use("/api/appointments", appointmentsRouter);
-  app.use("/api/payments", paymentsRouter);
+  app.use("/api/payments",     paymentsRouter);
 
   // 404 for unknown API routes
   app.use("/api/*", (_req, res) => {
     res.status(404).json({ error: "API route not found" });
   });
 
-  // In production, serve the built frontend
+  // Serve frontend in production
   if (process.env.NODE_ENV === "production") {
     const staticPath = path.resolve(__dirname, "public");
     app.use(express.static(staticPath));
@@ -55,19 +57,21 @@ async function startServer() {
     });
   }
 
-  const port = process.env.PORT || (process.env.NODE_ENV === "production" ? 3000 : 3001);
+  const port = Number(process.env.PORT) || (process.env.NODE_ENV === "production" ? 3000 : 3001);
 
   server.on("error", (err: NodeJS.ErrnoException) => {
     if (err.code === "EADDRINUSE") {
       console.error(`\nPort ${port} is already in use.`);
-      console.error(`Run this to free it:  npx kill-port ${port}\n`);
       process.exit(1);
     }
     throw err;
   });
 
-  server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${port}/`);
+    console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`MONGODB_URI set: ${!!process.env.MONGODB_URI}`);
+    console.log(`RAZORPAY_KEY_ID set: ${!!process.env.RAZORPAY_KEY_ID}`);
   });
 }
 

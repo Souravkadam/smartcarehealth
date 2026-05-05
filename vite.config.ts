@@ -181,11 +181,11 @@ export default defineConfig({
       "127.0.0.1",
     ],
     proxy: {
-      "/api": {
-        target: "http://localhost:3001",
-        changeOrigin: true,
+        "/api": {
+          target: "http://localhost:3001",
+          changeOrigin: true,
+        },
       },
-    },
     fs: {
       strict: true,
       deny: ["**/.*"],
