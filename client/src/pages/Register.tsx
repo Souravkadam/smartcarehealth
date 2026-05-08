@@ -7,11 +7,11 @@ import { Link, useLocation } from "wouter";
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "john12@gmail.com",
-    phone: "+91 98765 43210",
-    password: "user1234",
-    confirmPassword: "user1234",
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");

@@ -6,8 +6,8 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 
 export default function Login() {
-  const [email, setEmail] = useState("john12@gmail.com");
-  const [password, setPassword] = useState("user1234");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
