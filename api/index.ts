@@ -79,9 +79,11 @@ const Payment = mongoose.models.Payment || mongoose.model("Payment", PaymentSche
 let dbConnected = false;
 async function connectDB() {
   if (dbConnected && mongoose.connection.readyState === 1) return;
-  const uri = process.env.MONGODB_URI!;
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error("MONGODB_URI environment variable is not set");
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
   dbConnected = true;
+  console.log("MongoDB connected:", mongoose.connection.host);
 }
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
@@ -111,7 +113,10 @@ app.use((req, res, next) => {
 });
 app.use(async (_req, _res, next) => {
   try { await connectDB(); next(); }
-  catch (e) { next(e); }
+  catch (e: any) {
+    console.error("DB connection failed:", e.message);
+    _res.status(500).json({ error: "Database connection failed", detail: e.message });
+  }
 });
 
 // ─── HOSPITALS ────────────────────────────────────────────────────────────────
@@ -358,6 +363,12 @@ app.post("/api/payments/webhook", async (req, res) => {
 });
 
 app.use("/api/*", (_req, res) => res.status(404).json({ error: "API route not found" }));
+
+// Global error handler — always return JSON, never HTML
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: err.message || "Internal server error" });
+});
 
 // ─── Vercel handler ───────────────────────────────────────────────────────────
 export default function handler(req: VercelRequest, res: VercelResponse) {
