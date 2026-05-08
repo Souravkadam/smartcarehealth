@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "../dist/api"
+  }
+}
