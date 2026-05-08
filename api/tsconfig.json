@@ -1,14 +1,14 @@
 {
-  "extends": "../tsconfig.json",
-  "include": ["./**/*"],
   "compilerOptions": {
-    "strict": false,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
+    "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "../dist/api"
-  }
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "baseUrl": ".."
+  },
+  "include": ["./**/*"]
 }
